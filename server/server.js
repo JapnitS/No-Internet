@@ -1,12 +1,16 @@
 const http = require('http');
 const express = require('express');
 const MessagingResponse = require('twilio').twiml.MessagingResponse;
+const bodyParser = require('body-parser');
+
+
 
 const app = express();
+app.use(bodyParser.urlencoded({ extended: false }));
 console.log('hI');
 app.post('/sms', (req, res) => {
-    console.log(req);
-    console.log('ehasddas');
+    console.log(req.body);
+    
     const twiml = new MessagingResponse();
     var EmailResponse = Emailresponse();
     twiml.message(EmailResponse);
