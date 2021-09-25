@@ -6,8 +6,6 @@ const bodyParser = require('body-parser');
 const sendSmsToParticipants = require('./send-sms');
 const goData = require('./go-data');
 
-
-
 const axios = require('axios');
 
 require('dotenv').config();
@@ -22,12 +20,34 @@ app.post('/sms', async (req, res) => {
   if (Body.startsWith('4')) {
     let goTrainData = await goData();
     twiml.message(goTrainData);
-   
-  }
-  if (Body.startsWith('1')) {
-    query = Body.substring(1, Body.length);
+  } else if (Body.startsWith('1')) {
+    let query = Body.substring(1, Body.length);
+    let res = checkDict(query);
 
-    twiml.message(googleRequest(query));
+    res = JSON.parse(res);
+    
+    let origin = res[0].origin;
+
+    let meanings1 = [];
+    let meanings2 = [];
+
+    res[0].meanings.forEach((meaning) => {
+      meaning.definitions.forEach((def) => {
+        meanings1.push(def)['definition'];
+      });
+    });
+
+    meanings1.forEach((element) => {
+      meanings2.push(element['definition']);
+    });
+    let message =
+      query +
+      ' is originated from ' +
+      origin +
+      '\n' +
+      'It means: ' +
+      meanings2.join('or ');
+    twiml.message(message);
   } else if (Body.startsWith('3')) {
     query = Body.substring(1, Body.length);
 
@@ -49,8 +69,6 @@ app.post('/sms', async (req, res) => {
         ' degrees celcius',
     );
 
-    
-    
     //twiml.message(transitData());
   }
 
@@ -97,6 +115,15 @@ const gmailRequest = () => {
     'https://www.googleapis.com/gmail/v1/users/khuranajapnit@gmail.com/messages',
     false,
   );
+  xmlHttp.send(null);
+  return xmlHttp.responseText;
+};
+
+const checkDict =  (query) => {
+  let url =
+    'https://api.dictionaryapi.dev/api/v2/entries/en/' + query;
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.open('GET', url, false);
   xmlHttp.send(null);
   return xmlHttp.responseText;
 };
