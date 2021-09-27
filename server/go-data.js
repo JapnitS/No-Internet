@@ -9,10 +9,14 @@ async function fetchTransitData() {
   data.forEach((item) => {
     let attributes = item._attributes;
     console.log(attributes);
-    message += ` ${attributes.Scheduled} `;
+
+    message += '                                   ';
+    
+    attributes.TripName ? (message += ` NEXT TRIP ----> ${attributes.TripName} `) : (message += `NEXT TRIP ----> ${attributes.Destination}`);
     attributes.Delay == 0
-      ? (message += '---------> On Time              ')
-      : (message += `---------> Delayed ${attributes.DelayDesc} `);
+      ? (message += '{On Time}                    ')
+      : (message += `{Delayed} ${attributes.DelayDesc} `);
+    message += `Train Arrives in : ${attributes.ArriveIn} at ${attributes.ScheduledTime}`;
     //Spaces added for formatting
   });
   return message;
@@ -35,14 +39,13 @@ fetchData = async () => {
 };
 
 function sortData() {
-  console.log('IM IN SORT>>>>>>>>>>>');
   let unionBound = [];
   data.forEach((item) => {
     if (item._attributes.DirectionIndex == 1) {
       unionBound.push(item);
     }
   });
-  console.log(unionBound, 'LLLLLLLLLLLLLLL');
+
   return unionBound;
 }
 

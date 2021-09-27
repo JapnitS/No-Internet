@@ -10,7 +10,7 @@ const sendSmsToParticipants = () => {
     client.messages.create({
       to: participants[i],
       from: '+12898152609',
-      body: 'Hello your No-Internet Buddy welcomes you!! PRESS and SEND 1. Search a word up on google, 2. Read your new emails, 3.Check weather of your city, 4. Request an Uber Ride,',
+      body: 'Hello your No-Internet Buddy welcomes you!!                      SEND 1. Search a word up on google followed by the word, 2. Read your new emails, 3.Check weather of your city, 4. Get the GO train timings,',
       // mediaUrl : 'https://demo.twilio.com/owl.png'
     });
   }
