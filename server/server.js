@@ -5,6 +5,8 @@ const MessagingResponse = require('twilio').twiml.MessagingResponse;
 const bodyParser = require('body-parser');
 const sendSmsToParticipants = require('./send-sms');
 const goData = require('./go-data');
+const getDict = require('./check-dict');
+const getWeather = require('./check-weather')
 var request = require('request');
 
 const axios = require('axios');
@@ -20,62 +22,19 @@ app.post('/sms', async (req, res) => {
 
   if (Body.startsWith('4')) {
     let goTrainData = await goData();
-
     twiml.message(goTrainData);
-  } else if (Body.startsWith('1')) {
+    
+  } 
+  
+  else if (Body.startsWith('1')) {
     let query = Body.substring(1, Body.length);
-    let res = checkDict(query);
-
-    res = JSON.parse(res);
-
-    let origin = res[0].origin;
-
-    let meanings1 = [];
-    let meanings2 = [];
-
-    res[0].meanings.forEach((meaning) => {
-      meaning.definitions.forEach((def) => {
-        meanings1.push(def)['definition'];
-      });
-    });
-
-    meanings1.forEach((element) => {
-      meanings2.push(element['definition']);
-    });
-    let message =
-      query +
-      ' is originated from ' +
-      origin +
-      '\n' +
-      'It means: ' +
-      meanings2.join('or ');
-    twiml.message(message);
-  } else if (Body.startsWith('3')) {
+    twiml.message(getDict(query));
+  } 
+  
+  else if (Body.startsWith('3')) {
     query = Body.substring(1, Body.length);
-
-    let res = '';
-    res = checkWeather(query);
-    res = JSON.parse(res);
-
-    let min_temp = parseInt(res['main']['temp_min']) / 10;
-    let max_temp = parseInt(res['main']['temp_max']) / 10;
-    twiml.message(
-      'The weather in' +
-        query +
-        ' is ' +
-        res['weather'][0]['description'] +
-        ' with a min temp of ' +
-        min_temp +
-        ' degrees celcius and a max temp of ' +
-        max_temp +
-        ' degrees celcius',
-    );
-
-    //twiml.message(transitData());
+    twiml.message(getWeather(query));
   }
-
-  // let b = gmailRequest();
-  // console.log(b);
 
   res.writeHead(200, { 'Content-Type': 'text/xml' });
 
@@ -161,46 +120,28 @@ const getMails = (access_token) => {
   console.log(xmlHttp.responseText);
   return xmlHttp.responseText;
 };
-const getBusData = () => {};
+
+
+
+
+// const checkWeather = (city) => {
+//   var xmlHttp = new XMLHttpRequest();
+//   xmlHttp.open(
+//     'GET',
+//     'https://api.openweathermap.org/data/2.5/weather?q=' +
+//       city +
+//       '&appid=0c4cafc732d5cca1dafebe44159f496d',
+//     false,
+//   ); // false for synchronous request
+
+//   xmlHttp.send(null);
+
+//   return xmlHttp.responseText;
+// };
 
 http.createServer(app).listen(1337, () => {
   console.log('Express server listening on port 1337');
 });
-
-const checkWeather = (city) => {
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open(
-    'GET',
-    'https://api.openweathermap.org/data/2.5/weather?q=' +
-      city +
-      '&appid=0c4cafc732d5cca1dafebe44159f496d',
-    false,
-  ); // false for synchronous request
-
-  xmlHttp.send(null);
-
-  return xmlHttp.responseText;
-};
-
-const gmailRequest = () => {
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open(
-    'GET',
-    'https://www.googleapis.com/gmail/v1/users/khuranajapnit@gmail.com/messages',
-    false,
-  );
-  xmlHttp.send(null);
-  return xmlHttp.responseText;
-};
-
-const checkDict = (query) => {
-  let url =
-    'https://api.dictionaryapi.dev/api/v2/entries/en/' + query;
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open('GET', url, false);
-  xmlHttp.send(null);
-  return xmlHttp.responseText;
-};
 
 // 409688306034-agv1jid3vjmugpjvj6sj7t7t1g5aahm5.apps.googleusercontent.com
 // 2MZNzHd6B6-57pHSfIusoiJf
